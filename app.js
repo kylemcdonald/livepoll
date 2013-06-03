@@ -15,23 +15,26 @@ io = require('socket.io').listen(server);
 
 var mouseCollection = new Object();
 var newFrame = true;
+var userId = 0;
 io.sockets.on('connection', function (socket) {
 
-	socket.on('mouse', function (data) {
-		mouseCollection[socket.id] = data;
+	socket.userId = userId++;
+
+	socket.on('m', function (data) {
+		mouseCollection[socket.userId] = data;
 		newFrame = true;
 	});
 
 	socket.on('disconnect', function() {
-		delete mouseCollection[socket.id];
+		delete mouseCollection[socket.userId];
 	});
 
-	socket.emit('socket.id', socket.id);
+	socket.emit('id', socket.userId);
 });
 
 setInterval(function() {
 	if(newFrame) {
-		io.sockets.emit('mouseCollection', mouseCollection);
+		io.sockets.emit('mc', mouseCollection);
 		newFrame = false;
 	}
 }, 100);
