@@ -14,12 +14,17 @@
       h = $(document).height();
     });
     var socket = io.connect();
+    var updateReady = true;
     $(document).mousemove(function(event) {
-      socket.emit('mouse', {
-        x: event.pageX / w,
-        y: event.pageY / h
-      });
+      if(updateReady) {
+        socket.emit('mouse', {
+          x: event.pageX / w,
+          y: event.pageY / h
+        });
+        updateReady = false;
+      }
     });
+    setInterval(function() {updateReady = true}, 100); // min time between sending mouse movement
     socket.on('mouseCollection', function (mouseCollection) {
       var cursors = $("#cursors");
       for(var id in mouseCollection) {
