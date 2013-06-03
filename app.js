@@ -25,6 +25,8 @@ io.sockets.on('connection', function (socket) {
 	socket.on('disconnect', function() {
 		delete mouseCollection[socket.id];
 	});
+
+	socket.emit('socket.id', socket.id);
 });
 
 setInterval(function() {

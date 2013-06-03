@@ -26,6 +26,7 @@
     });
     setInterval(function() {updateReady = true}, 100); // min time between sending mouse movement
     socket.on('mouseCollection', function (mouseCollection) {
+      delete mouseCollection[socket.id]; // don't show myself
       var cursors = $("#cursors");
       for(var id in mouseCollection) {
         if(!$("#" + id).length) {
@@ -42,6 +43,9 @@
           this.remove();
         }
       });
+    });
+    socket.on('socket.id', function (id) {
+      socket.id = id;
     });
   </script>
   <style>
