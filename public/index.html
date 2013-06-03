@@ -7,13 +7,15 @@
     var packAmount = 1000;
     function packPosition(x) {return Math.floor(x * packAmount);}
     function unpackPosition(x) {return x / packAmount;}
+    function clamp(x, min, max) {return x < min ? min : (x > max ? max : x);}
+    function map(x, minin, maxin, minout, maxout) {return (maxout - minout) * (x - minin) / (maxin - minin) + minout;}
 
     var w, h;
     $(document).ready(function() {
       w = $(document).width();
       h = $(document).height();
     });
-    $(document).resize(function() {
+    $(window).resize(function() {
       w = $(document).width();
       h = $(document).height();
     });
@@ -30,18 +32,25 @@
     });
     setInterval(function() {updateReady = true}, 100); // min time between sending mouse movement
     socket.on('mc', function (mouseCollection) {
-      delete mouseCollection[socket.id]; // don't show myself
       var cursors = $("#cursors");
+      var avg = 0, count = 0;
       for(var id in mouseCollection) {
-        if(!$("#" + id).length) {
-          // add new cursors
-          cursors.append('<img src="cursor.png" id="' + id + '" style="position:absolute;"/>')
-        }
         var mouse = mouseCollection[id];
-        // update cursors
-        var x = unpackPosition(mouse.x) * w, y = unpackPosition(mouse.y) * h;
-        $("#" + id).offset({left: x, top: y});
+        var x = unpackPosition(mouse.x);
+        var y = unpackPosition(mouse.y);
+        avg += clamp(x, .2, .8);
+        count++;
+        if(id != socket.id) { // don't show myself
+          if(!$("#" + id).length) {
+            // add new cursors
+            cursors.append('<img src="cursor.png" id="' + id + '" style="position:absolute;"/>')
+          }
+          // update cursors
+          $("#" + id).offset({left: x * w, top: y * h});
+        }
       }
+      avg /= count;
+      $("#percentage").text(Math.floor(map(avg, .2, .8, 100, 0)) + "%");
       // remove disconnected cursors
       $("#cursors").children().each(function() {
         if(!(this.id in mouseCollection)) {
@@ -55,27 +64,35 @@
   </script>
   <style>
   body {
-    overflow:hidden
-  }
-  h1 {
+    overflow:hidden;
     font-family: sans-serif;
-    font-size: 64px;
+    font-size: 4em;
   }
+  .unselectable {
+    cursor:default;
+     -moz-user-select: -moz-none;
+     -khtml-user-select: none;
+     -webkit-user-select: none;
+     -ms-user-select: none;
+     user-select: none;
+   }
   .center {
     left: 0;
-    line-height: 1em;
-    margin-top: -.5em;
     position: absolute;
     text-align: center;
     top: 50%;
     width: 100%;
   }
+  .offset {
+    line-height: 1em;
+    margin-top: -.5em;
+  }
   </style>
 </head>
-<body>
-  <h1 class="center" id="percentage">50%</h1>
-  <h1 class="center" style="left: -30%" id="plus">+</h1>
-  <h1 class="center" style="left: +30%" id="minus">-</h1>
+<body class="unselectable">
+  <h1 class="center offset" id="percentage">50%</h1>
+  <div class="center"><h1 id="minus" class="offset" style="margin-left: 10%; margin-right: 90%;">+</h1></div>
+  <div class="center"><h1 id="plus" class="offset" style="margin-left: 80%; margin-right: 20%;">-</h1></div>
   <div id="cursors"></div>
 </body>
 </html>
