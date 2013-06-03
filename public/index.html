@@ -1,0 +1,56 @@
+<html>
+<head>
+  <title>Vote</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="/socket.io/socket.io.js"> </script>
+  <script>
+    var w, h;
+    $(document).ready(function() {
+      w = $(document).width();
+      h = $(document).height();
+    });
+    $(document).resize(function() {
+      w = $(document).width();
+      h = $(document).height();
+    });
+    var socket = io.connect('http://localhost');
+    $(document).mousemove(function(event) {
+      socket.emit('mouse', {
+        x: event.pageX / w,
+        y: event.pageY / h
+      });
+    });
+    socket.on('mouseCollection', function (mouseCollection) {
+      var cursors = $("#cursors");
+      for(var id in mouseCollection) {
+        if(!$("#" + id).length) {
+          // add new cursors
+          cursors.append('<img src="cursor.png" id="' + id + '" style="position:absolute;"/>')
+        }
+        var mouse = mouseCollection[id];
+        // update cursors
+        $("#" + id).offset({left: mouse.x * w, top: mouse.y * h});
+      }
+      // remove disconnected cursors
+      $("#cursors").children().each(function() {
+        if(!(this.id in mouseCollection)) {
+          this.remove();
+        }
+      });
+    });
+    setInterval(function() {socket.emit('update')}, 33);
+  </script>
+  <style>
+  body {
+    font-family: sans-serif;
+    font-size: 16px;
+    overflow:hidden
+  }
+  </style>
+</head>
+<body>
+  <h1>Hello.</h1>
+  <p>Please click to vote.</p>
+  <div id="cursors"></div>
+</body>
+</html>
