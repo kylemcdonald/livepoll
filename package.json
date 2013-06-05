@@ -1,11 +1,12 @@
 {
   "name": "livepoll",
   "description": "Live polling application.",
-  "version": "0.0.1-6",
+  "version": "0.0.1-7",
   "private": false,
   "dependencies": {
     "express": "3.x",
-    "socket.io": "0.9.13"
+    "socket.io": "0.9.13",
+    "hammerjs": "1.x"
   },
   "subdomain": "livepoll",
   "scripts": {
