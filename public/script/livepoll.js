@@ -31,7 +31,7 @@ $(window).resize(function() {
 var socket = io.connect();
 var updateReady = true;
 function mouseMoved(event) {
-  $("#bar").offset({left: event.pageX - 20, top:0});
+  //$("#bar").offset({left: event.pageX - 20, top:0});
   if(updateReady) {
     socket.emit('m', {
       x: packPosition(event.pageX / w),
@@ -84,5 +84,6 @@ function updateCursors() {
   avg /= count;
   var percentage = Math.floor(map((count == 0 ? .5 : avg), .2, .8, 100, 0));
   $("#percentage").text(percentage + "%");
+  $("#bar").offset({left: avg * w - 20, top:0});
 }
 setInterval(function() {updateCursors()}, 33);
