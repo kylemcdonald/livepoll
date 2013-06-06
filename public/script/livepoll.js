@@ -82,8 +82,10 @@ function updateCursors() {
     }
   }
   avg /= count;
-  var percentage = Math.floor(map((count == 0 ? .5 : avg), .2, .8, 100, 0));
-  $("#percentage").text(percentage + "%");
+  var percentage = Math.floor(map((count == 0 ? 1 : avg), .2, .8, 100, 0));
+  //$("#percentage").text(percentage + "%");
+  var viewCount = Math.pow(10, map(percentage, 0, 100, 0, 9.2));
+  $("#percentage").text(numeral(viewCount).format('0a'));
   $("#avg").offset({left: avg * w - 20, top:0});
 }
 setInterval(function() {updateCursors()}, 33);
